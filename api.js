@@ -1,8 +1,10 @@
-var request = require('request');
-const urls = require('./url.json');
+const request = require('request');
+const cookie = require("./configs/config.json").cookie;
+const urls = require('./configs/url.json');
 var that = this;
-const cookie = urls.cookie;
+
 var quantidadeUrl = urls.sku.length;
+
 that.j = 0
 
     that.handleCallback = {};

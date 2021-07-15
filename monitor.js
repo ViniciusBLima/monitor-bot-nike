@@ -1,14 +1,13 @@
-var start = new Date()
-var hrstart = process.hrtime()
-var simulateTime = 5
-var a = false;
 const ipLocal = require('ip');
-
-var ip = ipLocal.address()
-
 const api = require('./api.js');
 const discord = require('discord.js');
 const discordInfo = require('./discord-info.json');
+const bot = require('./bot.js');
+const config = require('./configs/url.json');
+
+var ip = ipLocal.address()
+var tamanho = config.tamanho
+
 
 //-------------------------------------------------------------
 //-------------------------------------------------------------
@@ -19,12 +18,12 @@ const discordInfo = require('./discord-info.json');
 const client = new discord.Client();
 const webhookClient = new discord.WebhookClient(discordInfo.hookId, discordInfo.hookToken);
 
-webhookClient.send("BOT CONECTADO NO USUARIO: <@243176987584102400>, IP: "+ip);
+webhookClient.send("BOT CONECTADO NO USUARIO: <@243176987584102400>, IP: " + ip);
 
 //function que monitora o tenis
 
 
-function callBack(response) {
+async function callBack(response) {
   var retorno = JSON.parse(response)[0];
   if (retorno.status) {
     if (retorno.status == "AVAILABLE") {
@@ -40,44 +39,48 @@ function callBack(response) {
             preco: sku.price,
             imagem: sku.images.default.substr(2)
           }
+          if (tenis.tamanho == tamanho) {
+            console.log("Tenis "+tenis.nome+ "em estoque, tentando fazer a compra...")
+          }
 
-          webhookClient.send({
-            embeds: [{
-              color: 'FF0000',
-              thumbnail: {
-                'url': "https://" + tenis.imagem
-              },
-              title: ':flame: ITEM ' + tenis.nome + ' DISPONIVEL :flame:',
-              fields: [
-                {
-                  name: 'Item:',
-                  value: tenis.nome,
-                },
-                {
-                  name: 'Tamanho:',
-                  value: tenis.tamanho
-                },
-                {
-                  name: 'Preço:',
-                  value: tenis.preco
-                }
-              ]
-
-            }]
-          });
         };
       };
-    };
-  }
-  else {
-    console.log(response);
-  }
-  //
-};
+    }
+    else {
+      console.log(response);
+    }
+    //
+  };
+}
 
 
 setInterval(function () {
   api.sendRequest(callBack);
 }, 10000);
 
+function webhook() {
+  webhookClient.send({
+    embeds: [{
+      color: 'FF0000',
+      thumbnail: {
+        'url': "https://" + tenis.imagem
+      },
+      title: ':flame: ITEM ' + tenis.nome + ' DISPONIVEL :flame:',
+      fields: [
+        {
+          name: 'Item:',
+          value: tenis.nome,
+        },
+        {
+          name: 'Tamanho:',
+          value: tenis.tamanho
+        },
+        {
+          name: 'Preço:',
+          value: tenis.preco
+        }
+      ]
 
+    }]
+  });
+}
